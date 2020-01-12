@@ -1,33 +1,48 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  Button,
-  ScrollView,
-  FlatList
-} from 'react-native';
+import { StyleSheet, Text, View, Button, FlatList } from 'react-native';
 import GoalItem from './components/GoalItem';
 import GoalInput from './components/GoalInput';
 
 export default function App() {
   const [currentGoals, setCurrentGoals] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
 
   const addGoal = goalTitle => {
     setCurrentGoals(currentGoals => [
       ...currentGoals,
       { id: Math.random().toString(), value: goalTitle }
     ]);
+    setOpenModal(false);
+  };
+
+  const removeGoal = goalId => {
+    setCurrentGoals(currentGoals => {
+      return currentGoals.filter(goal => goal.id !== goalId);
+    });
+  };
+
+  const cancelHandler = () => {
+    setOpenModal(false);
   };
 
   return (
     <View style={styles.screen}>
-      <GoalInput onAddGoal={addGoal} />
+      <Button
+        title='Add a goal'
+        onPress={() => setOpenModal(true)}
+        cancel={cancelHandler}
+      />
+      <GoalInput isVisible={openModal} onAddGoal={addGoal} />
       <FlatList
         keyExtractor={(item, index) => item.id}
         data={currentGoals}
-        renderItem={itemData => <GoalItem title={itemData.item.value} />}
+        renderItem={itemData => (
+          <GoalItem
+            id={itemData.item.id}
+            title={itemData.item.value}
+            onPressHandler={removeGoal}
+          />
+        )}
       />
     </View>
   );
